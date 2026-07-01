@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta tag keamanan untuk GitHub Pages (Memaksa HTTPS) -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Etalase OpangDarmawan - Retro Creative Market</title>
+    
+    <!-- Favicon Inline Anti-Error 404 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📻</text></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -172,7 +177,6 @@
             <div class="flex gap-3 overflow-x-auto no-scrollbar py-2" id="category-container">
                 <!-- Categories injected via JS -->
             </div>
-            <!-- Sub Categories Container -->
             <div class="flex gap-3 overflow-x-auto no-scrollbar py-2 mt-2 hidden" id="subcategory-container">
                 <!-- Sub Categories injected via JS -->
             </div>
@@ -275,7 +279,7 @@
         };
         const mainCategories = Object.keys(categoryMap);
 
-        // Data Produk
+        // Data Produk (DIPERBARUI: Menggunakan Link Media Safe/Open Source Anti-Blokir)
         const products = [
             {
                 id: 1,
@@ -294,7 +298,7 @@
                 category: "Musik",
                 subCategory: "Kaset",
                 mediaType: "audio",
-                mediaUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", // MDN Safe Audio Link
                 priceIDR: 120000,
                 priceUSD: 8.50,
                 image: "https://placehold.co/400x400/d95c14/ffffff?text=Kaset+Pita",
@@ -306,7 +310,7 @@
                 category: "Video",
                 subCategory: "Animasi",
                 mediaType: "video",
-                mediaUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4", // MDN Safe Video Link
                 priceIDR: 350000,
                 priceUSD: 24.00,
                 image: "https://placehold.co/400x400/197278/ffffff?text=Retro+Bumper",
@@ -318,7 +322,7 @@
                 category: "Video",
                 subCategory: "Dokumenter",
                 mediaType: "video",
-                mediaUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4", // MDN Safe Video Link
                 priceIDR: 200000,
                 priceUSD: 14.00,
                 image: "https://placehold.co/400x400/2c251f/f4ecd8?text=VHS+Footage",
@@ -363,7 +367,7 @@
                 category: "Musik",
                 subCategory: "Digital Audio",
                 mediaType: "audio",
-                mediaUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", // MDN Safe Audio Link
                 priceIDR: 45000,
                 priceUSD: 3.00,
                 image: "https://placehold.co/400x400/ff3366/ffffff?text=Lofi+Beats",
@@ -401,7 +405,7 @@
             document.getElementById('ui-checkout-btn').innerText = t.checkout;
             document.getElementById('ui-wa-note').innerText = t.waNote;
             
-            // Re-render UI components to reflect translation and load products
+            // Re-render components
             renderCategories();
             renderSubCategories();
             renderProducts(); 
@@ -417,7 +421,6 @@
             const displayCategories = [translatedSemua, ...mainCategories];
             
             displayCategories.forEach((displayCat, index) => {
-                // Internal logic pakai text Indonesia (Semua) agar filter stabil lintas bahasa
                 const logicCat = index === 0 ? "Semua" : mainCategories[index - 1]; 
                 
                 const btn = document.createElement('button');
@@ -587,21 +590,17 @@
         function renderCart() {
             const container = document.getElementById('cart-items');
             const totalEl = document.getElementById('cart-total');
-            const emptyMsg = document.getElementById('empty-cart-msg');
             
             container.innerHTML = '';
             let totalIDR = 0;
             let totalUSD = 0;
 
-            emptyMsg.innerText = i18n[currentLang].emptyCart;
-
             if (cart.length === 0) {
-                emptyMsg.style.display = 'block';
+                // Pesan keranjang kosong sekarang dibuat secara dinamis untuk mencegah error null
+                container.innerHTML = `<div class="text-center text-gray-500 py-6" id="empty-cart-msg">${i18n[currentLang].emptyCart}</div>`;
                 totalEl.innerHTML = `${formatPrice(0, 'IDR')} <br><span class="text-sm font-bold text-gray-500">${formatPrice(0, 'USD')}</span>`;
                 return;
             }
-
-            emptyMsg.style.display = 'none';
 
             cart.forEach(item => {
                 // Kalkulasi Sub-total untuk masing-masing baris item yang berubah seiring qty
