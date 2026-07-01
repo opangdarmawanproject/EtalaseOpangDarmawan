@@ -167,51 +167,6 @@
             </div>
         </section>
 
-        <!-- Media Player Tester (Upload & Link) - Tersembunyi sampai Audio/Video dipilih -->
-        <section id="media-tester-section" class="mb-10 hidden transition-all duration-500">
-            <div class="retro-card p-4 md:p-6 bg-[#e6af2e] border-4">
-                <h3 class="font-retro-title text-2xl font-bold mb-4 flex items-center gap-2 border-b-2 border-[#2c251f] pb-2">
-                    <i class="fa-solid fa-tv"></i> Pratinjau Media Kustom Anda
-                </h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                    
-                    <!-- Input Section -->
-                    <div class="space-y-4 bg-white p-4 border-2 border-[#2c251f] shadow-[4px_4px_0px_#2c251f]">
-                        <p class="text-sm font-bold border-b-2 border-dashed border-[#2c251f] pb-2 mb-2">Pilih sumber untuk mencoba pemutar bergaya retro kami.</p>
-                        
-                        <div>
-                            <label class="block font-bold mb-1 text-sm"><i class="fa-solid fa-link"></i> Tempel Link (URL):</label>
-                            <input type="text" id="custom-url-input" class="w-full p-2 border-2 border-[#2c251f] focus:outline-none focus:bg-[#fff2cd]" placeholder="https://contoh.com/video.mp4">
-                        </div>
-                        
-                        <div class="relative text-center py-2">
-                            <span class="bg-white px-2 text-xs font-bold absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 border border-[#2c251f]">ATAU</span>
-                            <hr class="border-t-2 border-dashed border-[#2c251f]">
-                        </div>
-                        
-                        <div>
-                            <label class="block font-bold mb-1 text-sm"><i class="fa-solid fa-file-arrow-up"></i> Upload File (Video/Audio):</label>
-                            <input type="file" id="custom-file-input" accept="video/*, audio/*" class="w-full p-1 border-2 border-[#2c251f] file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-[#d95c14] file:text-white hover:file:bg-[#2c251f] cursor-pointer">
-                        </div>
-                        
-                        <button onclick="playCustomMedia()" class="retro-btn w-full py-2 mt-2 flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-play"></i> Putar Media
-                        </button>
-                    </div>
-
-                    <!-- Player Area -->
-                    <div class="border-4 border-[#2c251f] bg-black h-64 md:h-full min-h-[250px] relative shadow-[6px_6px_0px_#2c251f] flex justify-center items-center overflow-hidden" id="custom-player-container">
-                        <!-- Default Placeholder -->
-                        <div class="text-center text-gray-500 animate-pulse">
-                            <i class="fa-solid fa-film text-4xl mb-2"></i>
-                            <p class="font-bold text-sm font-retro-title">Sinyal Kosong</p>
-                            <p class="text-xs mt-1">Masukkan Link / Upload File</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Product Grid -->
         <section id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             <!-- Products injected via JS -->
@@ -390,7 +345,6 @@
         let currentCurrency = 'IDR';
         let activeCategory = "Semua";
         let activeSubCategory = "Semua";
-        let currentObjectUrl = null; // Menyimpan memori URL upload sementara
 
         const waNumber = "6281234567890"; 
 
@@ -419,15 +373,6 @@
                     activeCategory = cat;
                     activeSubCategory = "Semua";
                     
-                    // Logic memunculkan alat Pemutar Media Tester jika masuk kategori Video/Musik
-                    const testerSection = document.getElementById('media-tester-section');
-                    if (cat === "Video" || cat === "Musik") {
-                        testerSection.classList.remove('hidden');
-                    } else {
-                        testerSection.classList.add('hidden');
-                        stopCustomMedia(); // matikan jika user berpindah kategori
-                    }
-
                     renderCategories(); 
                     renderSubCategories();
                     renderProducts();
@@ -537,76 +482,6 @@
                 grid.appendChild(card);
             });
         }
-
-        // --- FUNGSI CUSTOM MEDIA PLAYER (Upload / Link) ---
-        function playCustomMedia() {
-            const urlInput = document.getElementById('custom-url-input').value.trim();
-            const fileInput = document.getElementById('custom-file-input').files[0];
-            const container = document.getElementById('custom-player-container');
-            
-            container.innerHTML = ''; // Bersihkan container layar
-
-            let src = '';
-            let isVideo = true;
-
-            // Bersihkan memori object URL sebelumnya jika ada
-            if (currentObjectUrl) {
-                URL.revokeObjectURL(currentObjectUrl);
-                currentObjectUrl = null;
-            }
-
-            if (fileInput) {
-                src = URL.createObjectURL(fileInput);
-                currentObjectUrl = src; // simpan untuk pembersihan nanti
-                isVideo = fileInput.type.startsWith('video');
-            } else if (urlInput) {
-                src = urlInput;
-                // Tebak tipe dari ekstensi, jika tidak bisa ditebak anggap saja video sesuai kategori atau coba putar
-                isVideo = urlInput.match(/\.(mp4|webm|ogg)$/i) || activeCategory === "Video";
-                if(urlInput.match(/\.(mp3|wav|ogg)$/i)) isVideo = false;
-            } else {
-                showToast("Silakan tempel link atau upload file terlebih dahulu!", true);
-                stopCustomMedia();
-                return;
-            }
-
-            if (isVideo) {
-                container.innerHTML = `
-                    <video controls autoplay class="w-full h-full object-contain bg-black">
-                        <source src="${src}">
-                    </video>
-                `;
-            } else {
-                container.innerHTML = `
-                    <div class="w-full h-full flex flex-col items-center justify-center p-4 bg-[#197278] text-white">
-                        <i class="fa-solid fa-music text-5xl mb-4 animate-bounce"></i>
-                        <p class="font-bold mb-4">Memutar Audio Kustom...</p>
-                        <audio controls autoplay class="w-3/4">
-                            <source src="${src}">
-                        </audio>
-                    </div>
-                `;
-            }
-            showToast("Memutar media kustom...");
-        }
-
-        function stopCustomMedia() {
-            const container = document.getElementById('custom-player-container');
-            if (currentObjectUrl) {
-                URL.revokeObjectURL(currentObjectUrl);
-                currentObjectUrl = null;
-            }
-            container.innerHTML = `
-                <div class="text-center text-gray-500 animate-pulse">
-                    <i class="fa-solid fa-film text-4xl mb-2"></i>
-                    <p class="font-bold text-sm font-retro-title">Sinyal Kosong</p>
-                    <p class="text-xs mt-1">Masukkan Link / Upload File</p>
-                </div>
-            `;
-            document.getElementById('custom-url-input').value = "";
-            document.getElementById('custom-file-input').value = "";
-        }
-        // ----------------------------------------------------
 
         // Ganti Mata Uang
         function setCurrency(currency) {
