@@ -285,7 +285,7 @@
                 mediaType: "image",
                 priceIDR: 150000,
                 priceUSD: 10.50,
-                image: "OKV06886b.jpg",
+                image: "https://placehold.co/400x400/e6af2e/2c251f?text=Poster+Vintage",
                 desc: "Desain poster gaya retro tahun 70an dengan typografi klasik."
             },
             {
@@ -605,19 +605,24 @@
             emptyMsg.style.display = 'none';
 
             cart.forEach(item => {
-                totalIDR += item.priceIDR * item.qty;
-                totalUSD += item.priceUSD * item.qty;
+                // Kalkulasi Sub-total untuk masing-masing baris item
+                const subTotalIDR = item.priceIDR * item.qty;
+                const subTotalUSD = item.priceUSD * item.qty;
+                
+                // Kalkulasi Grand Total Keseluruhan
+                totalIDR += subTotalIDR;
+                totalUSD += subTotalUSD;
 
                 const row = document.createElement('div');
                 row.className = 'flex items-center gap-3 border-b-2 border-dashed border-gray-300 pb-3';
                 
-                // UI Tombol Qty (Lebih besar & mudah di-klik)
+                // UI Tombol Qty & Harga Sub-Total
                 row.innerHTML = `
                     <img src="${item.image}" class="w-16 h-16 object-cover border border-[#2c251f]">
                     <div class="flex-grow">
                         <h4 class="font-bold text-sm leading-tight mb-1">${item.name}</h4>
-                        <div class="text-[#d95c14] font-bold text-sm leading-none">${formatPrice(item.priceIDR, 'IDR')}</div>
-                        <div class="text-gray-500 font-bold text-xs mt-0.5">${formatPrice(item.priceUSD, 'USD')}</div>
+                        <div class="text-[#d95c14] font-bold text-sm leading-none">${formatPrice(subTotalIDR, 'IDR')}</div>
+                        <div class="text-gray-500 font-bold text-xs mt-0.5">${formatPrice(subTotalUSD, 'USD')}</div>
                     </div>
                     <div class="flex items-center border-2 border-[#2c251f] bg-white h-8 w-24">
                         <button onclick="changeQty(${item.id}, -1)" class="flex-1 h-full bg-[#f4ecd8] hover:bg-[#e6af2e] transition-colors border-r-2 border-[#2c251f] flex items-center justify-center font-bold text-lg active:bg-[#d95c14] active:text-white">-</button>
