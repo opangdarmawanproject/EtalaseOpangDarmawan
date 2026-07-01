@@ -207,7 +207,7 @@
             </div>
         </div>
         <div class="text-center mt-8 pt-4 border-t-2 border-[#2c251f] border-dashed">
-            <p>&copy; 2026 EtalaseOpangDarmawan. All rights reserved.</p>
+            <p>&copy; 2026 EtalaseOpangDarmawan. All rights reserved. Aman dipublish di Github.</p>
         </div>
     </footer>
 
@@ -404,7 +404,7 @@
             // Re-render UI components to reflect translation and load products
             renderCategories();
             renderSubCategories();
-            renderProducts(); // Render ulang agar etalase tidak kosong di awal
+            renderProducts(); 
             renderCart();
         }
 
@@ -417,8 +417,8 @@
             const displayCategories = [translatedSemua, ...mainCategories];
             
             displayCategories.forEach((displayCat, index) => {
-                // Internal logic pakai text Indonesia (Semua) agar filter stabil
-                const logicCat = index === 0 ? "Semua" : displayCat; 
+                // Internal logic pakai text Indonesia (Semua) agar filter stabil lintas bahasa
+                const logicCat = index === 0 ? "Semua" : mainCategories[index - 1]; 
                 
                 const btn = document.createElement('button');
                 btn.innerText = displayCat;
@@ -452,7 +452,6 @@
             container.classList.remove('hidden');
             const translatedSemua = i18n[currentLang].catAll;
             
-            // Sub kategori statis IDR, hanya "Semua" yang diganti bahasanya
             const subs = [translatedSemua, ...categoryMap[activeCategory]];
             
             subs.forEach((displaySub, index) => {
@@ -574,8 +573,8 @@
                 if (item.qty <= 0) {
                     removeFromCart(productId);
                 } else {
-                    updateCartCount(); // Pastikan update badge merah
-                    renderCart();
+                    updateCartCount(); // Pastikan update badge merah sinkron
+                    renderCart();      // Perbarui tampilan baris harga total
                 }
             }
         }
@@ -605,7 +604,7 @@
             emptyMsg.style.display = 'none';
 
             cart.forEach(item => {
-                // Kalkulasi Sub-total untuk masing-masing baris item
+                // Kalkulasi Sub-total untuk masing-masing baris item yang berubah seiring qty
                 const subTotalIDR = item.priceIDR * item.qty;
                 const subTotalUSD = item.priceUSD * item.qty;
                 
@@ -616,7 +615,7 @@
                 const row = document.createElement('div');
                 row.className = 'flex items-center gap-3 border-b-2 border-dashed border-gray-300 pb-3';
                 
-                // UI Tombol Qty & Harga Sub-Total
+                // UI Tombol Qty & Harga Sub-Total Baris Produk
                 row.innerHTML = `
                     <img src="${item.image}" class="w-16 h-16 object-cover border border-[#2c251f]">
                     <div class="flex-grow">
@@ -633,7 +632,7 @@
                 container.appendChild(row);
             });
 
-            // Tampilkan total dengan dua mata uang
+            // Tampilkan total keseluruhan di bawah (dua mata uang)
             totalEl.innerHTML = `${formatPrice(totalIDR, 'IDR')} <br><span class="text-sm font-bold text-gray-500">${formatPrice(totalUSD, 'USD')}</span>`;
         }
 
@@ -665,7 +664,7 @@
             window.open(waUrl, '_blank');
         }
 
-        // Custom Toast Notification
+        // Custom Toast Notification (Anti-alert blocker)
         function showToast(message, isError = false) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
