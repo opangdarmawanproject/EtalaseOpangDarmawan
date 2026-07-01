@@ -62,11 +62,6 @@
             box-shadow: 0px 0px 0px var(--text-dark);
         }
 
-        .retro-btn-secondary {
-            background-color: var(--bg-vintage);
-            color: var(--text-dark);
-        }
-
         /* Animasi Cahaya Berganti Warna untuk Teks */
         .color-changing-text {
             animation: retroGlow 5s infinite alternate;
@@ -120,6 +115,13 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Custom Audio Player Styling for Webkit */
+        audio {
+            height: 40px;
+            border-radius: 0;
+            outline: none;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -149,15 +151,64 @@
         <section class="mb-10 text-center py-10 px-4 retro-card bg-[#fff2cd]">
             <h2 class="font-retro-title text-4xl md:text-5xl mb-4 font-bold">Karya Vintage & Retro</h2>
             <p class="text-lg md:text-xl max-w-2xl mx-auto border-t-2 border-b-2 border-dashed border-[#2c251f] py-3">
-                Koleksi produk kreatif pilihan. Dari desain lawas hingga barang kriya bergaya klasik. 
+                Koleksi produk kreatif pilihan. Dari desain lawas hingga media audio visual bergaya klasik. 
                 Belanja mudah, estetik tiada dua.
             </p>
         </section>
 
         <!-- Categories Filter -->
-        <section class="mb-8">
+        <section class="mb-6">
             <div class="flex gap-3 overflow-x-auto no-scrollbar py-2" id="category-container">
                 <!-- Categories injected via JS -->
+            </div>
+            <!-- Sub Categories Container -->
+            <div class="flex gap-3 overflow-x-auto no-scrollbar py-2 mt-2 hidden" id="subcategory-container">
+                <!-- Sub Categories injected via JS -->
+            </div>
+        </section>
+
+        <!-- Media Player Tester (Upload & Link) - Tersembunyi sampai Audio/Video dipilih -->
+        <section id="media-tester-section" class="mb-10 hidden transition-all duration-500">
+            <div class="retro-card p-4 md:p-6 bg-[#e6af2e] border-4">
+                <h3 class="font-retro-title text-2xl font-bold mb-4 flex items-center gap-2 border-b-2 border-[#2c251f] pb-2">
+                    <i class="fa-solid fa-tv"></i> Pratinjau Media Kustom Anda
+                </h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    
+                    <!-- Input Section -->
+                    <div class="space-y-4 bg-white p-4 border-2 border-[#2c251f] shadow-[4px_4px_0px_#2c251f]">
+                        <p class="text-sm font-bold border-b-2 border-dashed border-[#2c251f] pb-2 mb-2">Pilih sumber untuk mencoba pemutar bergaya retro kami.</p>
+                        
+                        <div>
+                            <label class="block font-bold mb-1 text-sm"><i class="fa-solid fa-link"></i> Tempel Link (URL):</label>
+                            <input type="text" id="custom-url-input" class="w-full p-2 border-2 border-[#2c251f] focus:outline-none focus:bg-[#fff2cd]" placeholder="https://contoh.com/video.mp4">
+                        </div>
+                        
+                        <div class="relative text-center py-2">
+                            <span class="bg-white px-2 text-xs font-bold absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 border border-[#2c251f]">ATAU</span>
+                            <hr class="border-t-2 border-dashed border-[#2c251f]">
+                        </div>
+                        
+                        <div>
+                            <label class="block font-bold mb-1 text-sm"><i class="fa-solid fa-file-arrow-up"></i> Upload File (Video/Audio):</label>
+                            <input type="file" id="custom-file-input" accept="video/*, audio/*" class="w-full p-1 border-2 border-[#2c251f] file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-[#d95c14] file:text-white hover:file:bg-[#2c251f] cursor-pointer">
+                        </div>
+                        
+                        <button onclick="playCustomMedia()" class="retro-btn w-full py-2 mt-2 flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-play"></i> Putar Media
+                        </button>
+                    </div>
+
+                    <!-- Player Area -->
+                    <div class="border-4 border-[#2c251f] bg-black h-64 md:h-full min-h-[250px] relative shadow-[6px_6px_0px_#2c251f] flex justify-center items-center overflow-hidden" id="custom-player-container">
+                        <!-- Default Placeholder -->
+                        <div class="text-center text-gray-500 animate-pulse">
+                            <i class="fa-solid fa-film text-4xl mb-2"></i>
+                            <p class="font-bold text-sm font-retro-title">Sinyal Kosong</p>
+                            <p class="text-xs mt-1">Masukkan Link / Upload File</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -228,12 +279,25 @@
     <div id="toast-container"></div>
 
     <script>
+        // Struktur Kategori & Sub Kategori (Diperbarui dengan Video)
+        const categoryMap = {
+            "Karya Seni": ["Lukisan", "Poster", "Ilustrasi"],
+            "Digital": ["Preset", "Logo", "Font"],
+            "Video": ["Pendek", "Dokumenter", "Animasi"], // Kategori Baru
+            "Musik": ["Kaset", "Vinyl", "Digital Audio"],
+            "Kriya": ["Kayu", "Kulit", "Logam"],
+            "Tulisan": ["Puisi", "Cerpen", "Copywriting"]
+        };
+        const mainCategories = ["Semua", ...Object.keys(categoryMap)];
+
         // Data Produk
         const products = [
             {
                 id: 1,
                 name: "Poster Typografi Mesin Tik",
                 category: "Karya Seni",
+                subCategory: "Poster",
+                mediaType: "image",
                 priceIDR: 150000,
                 priceUSD: 10.50,
                 image: "https://placehold.co/400x400/e6af2e/2c251f?text=Poster+Vintage",
@@ -241,76 +305,93 @@
             },
             {
                 id: 2,
+                name: "Kaset Mixtape Synthwave",
+                category: "Musik",
+                subCategory: "Kaset",
+                mediaType: "audio",
+                mediaUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // Audio dummy link
+                priceIDR: 120000,
+                priceUSD: 8.50,
+                image: "https://placehold.co/400x400/d95c14/ffffff?text=Kaset+Pita",
+                desc: "Album fisik kaset pita berisi track lo-fi dan synthwave original. Dengarkan pratinjaunya!"
+            },
+            {
+                id: 3,
+                name: "Bumper Animasi Retro 80s",
+                category: "Video",
+                subCategory: "Animasi",
+                mediaType: "video",
+                mediaUrl: "https://www.w3schools.com/html/mov_bbb.mp4", // Video dummy link
+                priceIDR: 350000,
+                priceUSD: 24.00,
+                image: "https://placehold.co/400x400/197278/ffffff?text=Retro+Bumper",
+                desc: "Animasi intro gaya VHS jadul untuk video konten Anda. Kualitas Full HD."
+            },
+            {
+                id: 4,
+                name: "Footage Kota Jakarta 1990",
+                category: "Video",
+                subCategory: "Dokumenter",
+                mediaType: "video",
+                mediaUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+                priceIDR: 200000,
+                priceUSD: 14.00,
+                image: "https://placehold.co/400x400/2c251f/f4ecd8?text=VHS+Footage",
+                desc: "Kumpulan klip dokumenter langka berformat MP4 bergaya camcorder klasik."
+            },
+            {
+                id: 5,
                 name: "Preset Kamera Analog",
                 category: "Digital",
+                subCategory: "Preset",
+                mediaType: "image",
                 priceIDR: 75000,
                 priceUSD: 5.00,
                 image: "https://placehold.co/400x400/197278/f4ecd8?text=Analog+Preset",
                 desc: "Paket filter Lightroom untuk memberikan efek roll film jadul pada foto digitalmu."
             },
             {
-                id: 3,
-                name: "Kaset Mixtape Synthwave",
-                category: "Musik",
-                priceIDR: 120000,
-                priceUSD: 8.50,
-                image: "https://placehold.co/400x400/d95c14/ffffff?text=Kaset+Pita",
-                desc: "Album fisik kaset pita berisi track lo-fi dan synthwave original."
-            },
-            {
-                id: 4,
+                id: 6,
                 name: "Dompet Kulit Handmade",
                 category: "Kriya",
+                subCategory: "Kulit",
+                mediaType: "image",
                 priceIDR: 350000,
                 priceUSD: 24.00,
                 image: "https://placehold.co/400x400/8b5a2b/ffffff?text=Dompet+Kulit",
                 desc: "Dompet kulit sapi asli yang dibuat dan dijahit tangan. Sangat awet."
             },
             {
-                id: 5,
+                id: 7,
                 name: "Jasa Ketik Puisi Romantis",
                 category: "Tulisan",
+                subCategory: "Puisi",
+                mediaType: "image",
                 priceIDR: 50000,
                 priceUSD: 3.50,
                 image: "https://placehold.co/400x400/d3c6aa/2c251f?text=Puisi+Ketik",
                 desc: "Puisi custom diketik menggunakan mesin tik antik pada kertas buram wangi."
             },
             {
-                id: 6,
-                name: "Desain Logo Gaya 80an",
-                category: "Digital",
-                priceIDR: 250000,
-                priceUSD: 17.50,
-                image: "https://placehold.co/400x400/ff3366/ffffff?text=Logo+80s",
-                desc: "Jasa pembuatan logo bergaya neon retro/synthwave era 1980."
-            },
-            {
-                id: 7,
-                name: "Lampu Meja Steampunk",
-                category: "Kriya",
-                priceIDR: 650000,
-                priceUSD: 45.00,
-                image: "https://placehold.co/400x400/3e3e3e/e6af2e?text=Lampu+Pipa",
-                desc: "Lampu meja unik yang dirangkai dari pipa besi dan bohlam edison."
-            },
-            {
                 id: 8,
-                name: "Gantungan Kunci Kayu",
-                category: "Kriya",
-                priceIDR: 35000,
-                priceUSD: 2.50,
-                image: "https://placehold.co/400x400/a0522d/ffffff?text=Gantungan",
-                desc: "Gantungan kunci kayu pinus dengan ukiran laser custom nama."
+                name: "Lo-Fi Beats Digital Audio",
+                category: "Musik",
+                subCategory: "Digital Audio",
+                mediaType: "audio",
+                mediaUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                priceIDR: 45000,
+                priceUSD: 3.00,
+                image: "https://placehold.co/400x400/ff3366/ffffff?text=Lofi+Beats",
+                desc: "Track audio lo-fi santai bebas hak cipta untuk latar video YouTube."
             }
         ];
-
-        const categories = ["Semua", ...new Set(products.map(p => p.category))];
         
         let cart = [];
         let currentCurrency = 'IDR';
         let activeCategory = "Semua";
+        let activeSubCategory = "Semua";
+        let currentObjectUrl = null; // Menyimpan memori URL upload sementara
 
-        // Kontak WA (Ganti dengan nomormu)
         const waNumber = "6281234567890"; 
 
         // Format Mata Uang
@@ -322,12 +403,12 @@
             }
         }
 
-        // Render Kategori
+        // Render Kategori Utama
         function renderCategories() {
             const container = document.getElementById('category-container');
             container.innerHTML = '';
             
-            categories.forEach(cat => {
+            mainCategories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.innerText = cat;
                 const isActive = cat === activeCategory;
@@ -336,7 +417,19 @@
                 
                 btn.onclick = () => {
                     activeCategory = cat;
-                    renderCategories(); // Re-render to update active styling
+                    activeSubCategory = "Semua";
+                    
+                    // Logic memunculkan alat Pemutar Media Tester jika masuk kategori Video/Musik
+                    const testerSection = document.getElementById('media-tester-section');
+                    if (cat === "Video" || cat === "Musik") {
+                        testerSection.classList.remove('hidden');
+                    } else {
+                        testerSection.classList.add('hidden');
+                        stopCustomMedia(); // matikan jika user berpindah kategori
+                    }
+
+                    renderCategories(); 
+                    renderSubCategories();
                     renderProducts();
                 };
                 
@@ -344,26 +437,93 @@
             });
         }
 
-        // Render Produk
+        // Render Sub Kategori
+        function renderSubCategories() {
+            const container = document.getElementById('subcategory-container');
+            container.innerHTML = '';
+            
+            if (activeCategory === "Semua") {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            const subs = ["Semua", ...categoryMap[activeCategory]];
+            
+            subs.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.innerText = sub;
+                const isActive = sub === activeSubCategory;
+                
+                btn.className = `px-3 py-1 border-2 border-dashed border-[#2c251f] font-bold text-xs uppercase whitespace-nowrap transition-all ${isActive ? 'bg-[#d95c14] text-white box-shadow-none translate-y-1' : 'bg-[#fffaf0] text-[#2c251f] hover:bg-gray-200 shadow-[2px_2px_0px_#2c251f]'}`;
+                
+                btn.onclick = () => {
+                    activeSubCategory = sub;
+                    renderSubCategories();
+                    renderProducts();
+                };
+                
+                container.appendChild(btn);
+            });
+        }
+
+        // Render Produk Beserta Media Playernya
         function renderProducts() {
             const grid = document.getElementById('product-grid');
             grid.innerHTML = '';
             
-            const filteredProducts = activeCategory === "Semua" 
-                ? products 
-                : products.filter(p => p.category === activeCategory);
+            let filteredProducts = products;
+            
+            if (activeCategory !== "Semua") {
+                filteredProducts = filteredProducts.filter(p => p.category === activeCategory);
+                if (activeSubCategory !== "Semua") {
+                    filteredProducts = filteredProducts.filter(p => p.subCategory === activeSubCategory);
+                }
+            }
+
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 font-bold text-gray-500 border-2 border-dashed border-[#2c251f] bg-[#fffaf0]">Belum ada karya di sub-kategori ini.</div>`;
+                return;
+            }
 
             filteredProducts.forEach(product => {
                 const price = currentCurrency === 'IDR' ? product.priceIDR : product.priceUSD;
                 
+                // Menentukan Tampilan Media HTML Berdasarkan Tipe
+                let mediaHTML = "";
+                if (product.mediaType === "video") {
+                    mediaHTML = `
+                        <video controls class="w-full h-48 object-cover bg-black" poster="${product.image}">
+                            <source src="${product.mediaUrl}" type="video/mp4">
+                            Browser Anda tidak mendukung tag video.
+                        </video>
+                    `;
+                } else if (product.mediaType === "audio") {
+                    mediaHTML = `
+                        <div class="relative group">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity">
+                            <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/90 to-transparent">
+                                <audio controls class="w-full h-8">
+                                    <source src="${product.mediaUrl}" type="audio/mpeg">
+                                    Browser Anda tidak mendukung tag audio.
+                                </audio>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Default image
+                    mediaHTML = `<img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300">`;
+                }
+
                 const card = document.createElement('div');
-                card.className = 'retro-card flex flex-col p-3';
+                card.className = 'retro-card flex flex-col p-3 bg-white';
                 card.innerHTML = `
-                    <div class="border-2 border-[#2c251f] mb-3 overflow-hidden">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300">
+                    <div class="border-2 border-[#2c251f] mb-3 overflow-hidden bg-black relative">
+                        ${mediaHTML}
                     </div>
-                    <div class="mb-2">
-                        <span class="bg-[#2c251f] text-white text-xs px-2 py-1 font-bold uppercase">${product.category}</span>
+                    <div class="mb-2 flex gap-1 flex-wrap">
+                        <span class="bg-[#2c251f] text-white text-[10px] px-2 py-1 font-bold uppercase">${product.category}</span>
+                        <span class="bg-[#d95c14] text-white text-[10px] px-2 py-1 font-bold uppercase">${product.subCategory}</span>
                     </div>
                     <h3 class="font-bold text-lg leading-tight mb-2 flex-grow">${product.name}</h3>
                     <p class="text-sm text-gray-700 mb-4 line-clamp-2 h-10">${product.desc}</p>
@@ -378,11 +538,80 @@
             });
         }
 
+        // --- FUNGSI CUSTOM MEDIA PLAYER (Upload / Link) ---
+        function playCustomMedia() {
+            const urlInput = document.getElementById('custom-url-input').value.trim();
+            const fileInput = document.getElementById('custom-file-input').files[0];
+            const container = document.getElementById('custom-player-container');
+            
+            container.innerHTML = ''; // Bersihkan container layar
+
+            let src = '';
+            let isVideo = true;
+
+            // Bersihkan memori object URL sebelumnya jika ada
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+                currentObjectUrl = null;
+            }
+
+            if (fileInput) {
+                src = URL.createObjectURL(fileInput);
+                currentObjectUrl = src; // simpan untuk pembersihan nanti
+                isVideo = fileInput.type.startsWith('video');
+            } else if (urlInput) {
+                src = urlInput;
+                // Tebak tipe dari ekstensi, jika tidak bisa ditebak anggap saja video sesuai kategori atau coba putar
+                isVideo = urlInput.match(/\.(mp4|webm|ogg)$/i) || activeCategory === "Video";
+                if(urlInput.match(/\.(mp3|wav|ogg)$/i)) isVideo = false;
+            } else {
+                showToast("Silakan tempel link atau upload file terlebih dahulu!", true);
+                stopCustomMedia();
+                return;
+            }
+
+            if (isVideo) {
+                container.innerHTML = `
+                    <video controls autoplay class="w-full h-full object-contain bg-black">
+                        <source src="${src}">
+                    </video>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="w-full h-full flex flex-col items-center justify-center p-4 bg-[#197278] text-white">
+                        <i class="fa-solid fa-music text-5xl mb-4 animate-bounce"></i>
+                        <p class="font-bold mb-4">Memutar Audio Kustom...</p>
+                        <audio controls autoplay class="w-3/4">
+                            <source src="${src}">
+                        </audio>
+                    </div>
+                `;
+            }
+            showToast("Memutar media kustom...");
+        }
+
+        function stopCustomMedia() {
+            const container = document.getElementById('custom-player-container');
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+                currentObjectUrl = null;
+            }
+            container.innerHTML = `
+                <div class="text-center text-gray-500 animate-pulse">
+                    <i class="fa-solid fa-film text-4xl mb-2"></i>
+                    <p class="font-bold text-sm font-retro-title">Sinyal Kosong</p>
+                    <p class="text-xs mt-1">Masukkan Link / Upload File</p>
+                </div>
+            `;
+            document.getElementById('custom-url-input').value = "";
+            document.getElementById('custom-file-input').value = "";
+        }
+        // ----------------------------------------------------
+
         // Ganti Mata Uang
         function setCurrency(currency) {
             currentCurrency = currency;
             
-            // Update Buttons UI
             const btnIdr = document.getElementById('btn-idr');
             const btnUsd = document.getElementById('btn-usd');
             
@@ -505,11 +734,10 @@
             const encodedText = encodeURIComponent(text);
             const waUrl = `https://wa.me/${waNumber}?text=${encodedText}`;
             
-            // Open WA in new tab
             window.open(waUrl, '_blank');
         }
 
-        // Custom Toast Notification (Pengganti Alert)
+        // Custom Toast Notification
         function showToast(message, isError = false) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -518,12 +746,10 @@
             
             container.appendChild(toast);
             
-            // Trigger animation
             setTimeout(() => {
                 toast.classList.add('show');
             }, 10);
 
-            // Remove after 3 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
@@ -535,6 +761,7 @@
         // Initialize on load
         window.onload = () => {
             renderCategories();
+            renderSubCategories();
             renderProducts();
         };
     </script>
