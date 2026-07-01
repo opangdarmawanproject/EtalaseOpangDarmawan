@@ -254,7 +254,6 @@ export default function App() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 text-black">
         
-        {}
         {view === 'home' && (
           <div className="animate-fade-in">
             <div className="text-center mb-10">
@@ -312,7 +311,6 @@ export default function App() {
           </div>
         )}
 
-        {}
         {view === 'cart' && (
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold border-b-4 border-black pb-4 mb-8 text-center font-typewriter text-black">
@@ -374,7 +372,7 @@ export default function App() {
                       <p>Atas Nama: <strong>Opang Darmawan</strong></p>
                     </div>
 
-                    <CheckoutForm onSubmit={handleCheckoutWA} />
+                    <CheckoutForm onSubmit={handleCheckoutWA} onError={showToast} />
                   </div>
                 </div>
               </div>
@@ -386,14 +384,14 @@ export default function App() {
   );
 }
 
-const CheckoutForm = ({ onSubmit }) => {
+const CheckoutForm = ({ onSubmit, onError }) => {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name || !address) {
-      alert("Mohon lengkapi nama dan alamat pengiriman."); // Fallback if browser validation fails
+      if (onError) onError("Mohon lengkapi nama dan alamat pengiriman."); 
       return;
     }
     onSubmit({ name, address });
