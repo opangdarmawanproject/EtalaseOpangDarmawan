@@ -688,7 +688,7 @@
             totalEl.innerHTML = `${formatPrice(totalIDR, 'IDR')} <br><span class="text-sm font-bold text-gray-500">${formatPrice(totalUSD, 'USD')}</span>`;
         }
 
-        // Checkout Proses menggunakan form lokal tanpa WhatsApp
+        // Checkout Proses menggunakan form lokal dan kirim ke Email (mailto)
         function processCheckout() {
             if (cart.length === 0) {
                 showToast(i18n[currentLang].emptyCart, true);
@@ -704,10 +704,44 @@
                 return;
             }
 
-            // Simulasi Checkout Sukses
+            // Menyusun isi pesan (body email)
+            let orderDetails = "Halo OpangDarmawan,\n\nAda pesanan baru dengan detail sebagai berikut:\n\n";
+            orderDetails += "=== DATA PEMBELI ===\n";
+            orderDetails += "Email Pembeli: " + email + "\n";
+            orderDetails += "Alamat Pengiriman: " + address + "\n\n";
+            orderDetails += "=== DETAIL PESANAN ===\n";
+            
+            let totalIDR = 0;
+            let totalUSD = 0;
+            
+            cart.forEach((item, index) => {
+                const subTotalIDR = item.priceIDR * item.qty;
+                const subTotalUSD = item.priceUSD * item.qty;
+                totalIDR += subTotalIDR;
+                totalUSD += subTotalUSD;
+                
+                orderDetails += (index + 1) + ". " + item.name + "\n";
+                orderDetails += "   Kategori: " + item.category + " - " + item.subCategory + "\n";
+                orderDetails += "   Jumlah: " + item.qty + "\n";
+                orderDetails += "   Subtotal: Rp " + subTotalIDR.toLocaleString('id-ID') + " / $" + subTotalUSD.toFixed(2) + "\n\n";
+            });
+            
+            orderDetails += "=== TOTAL KESELURUHAN ===\n";
+            orderDetails += "Total IDR: Rp " + totalIDR.toLocaleString('id-ID') + "\n";
+            orderDetails += "Total USD: $" + totalUSD.toFixed(2) + "\n\n";
+            orderDetails += "Mohon segera diproses. Terima kasih!";
+
+            const targetEmail = "opangdarmawanproject@gmail.com";
+            const subject = encodeURIComponent("Pesanan Baru dari " + email);
+            const body = encodeURIComponent(orderDetails);
+
+            // Buka aplikasi email bawaan (Gmail/Outlook dll) pengguna dengan data pesanan terisi
+            window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
+
+            // Simulasi Checkout Sukses di UI
             showToast(i18n[currentLang].checkoutSuccess);
             
-            // Mengosongkan Data
+            // Mengosongkan Data Keranjang
             cart = [];
             updateCartCount();
             renderCart();
