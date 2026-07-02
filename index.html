@@ -84,8 +84,8 @@
 
         /* Modal Styles */
         .modal-overlay {
-            background-color: rgba(44, 37, 31, 0.8);
-            backdrop-filter: blur(2px);
+            background-color: rgba(44, 37, 31, 0.85);
+            backdrop-filter: blur(3px);
         }
 
         /* Toast Notification */
@@ -93,7 +93,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 100;
+            z-index: 200;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -112,7 +112,7 @@
             transform: translateX(0);
         }
 
-        /* Hide scrollbar for category filter */
+        /* Hide scrollbar */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -121,7 +121,7 @@
             scrollbar-width: none;
         }
 
-        /* Custom Audio Player Styling */
+        /* Custom Audio Player */
         audio {
             height: 40px;
             border-radius: 0;
@@ -204,9 +204,9 @@
             <div>
                 <h4 id="ui-contact" class="font-bold text-xl mb-3 border-b-2 border-[#2c251f] inline-block">Kontak</h4>
                 <ul class="space-y-2">
-                    <li><i class="fa-brands fa-whatsapp w-6 text-green-700"></i> +62 812-3456-7890</li>
-                    <li><i class="fa-brands fa-instagram w-6"></i> @opang.darmawan</li>
                     <li><i class="fa-solid fa-envelope w-6"></i> hello@opangretro.com</li>
+                    <li><i class="fa-brands fa-instagram w-6"></i> @opang.darmawan</li>
+                    <li><i class="fa-solid fa-location-dot w-6"></i> Jakarta, Indonesia</li>
                 </ul>
             </div>
         </div>
@@ -215,7 +215,7 @@
         </div>
     </footer>
 
-    <!-- Cart Modal -->
+    <!-- Cart Modal (Checkout via Email & Address) -->
     <div id="cart-modal" class="fixed inset-0 modal-overlay z-[100] hidden flex justify-center items-center p-4">
         <div class="retro-card w-full max-w-md max-h-[90vh] flex flex-col relative bg-white">
             <button onclick="toggleCart()" class="absolute top-3 right-4 text-2xl font-bold hover:text-red-600 z-10">
@@ -232,18 +232,37 @@
                 <div class="text-center text-gray-500 py-6" id="empty-cart-msg">Keranjang masih kosong, Bung!</div>
             </div>
 
-            <div class="p-4 border-t-2 border-[#2c251f] bg-[#f4ecd8]">
-                <div class="flex justify-between items-start mb-4 text-xl font-bold">
+            <!-- Form Data Pembeli -->
+            <div class="p-4 border-t-2 border-[#2c251f] bg-[#f4ecd8] flex flex-col gap-3">
+                <div class="flex flex-col gap-2">
+                    <input type="email" id="buyer-email" class="w-full p-2 border-2 border-[#2c251f] bg-white outline-none font-sans font-bold text-sm" placeholder="Email Pembeli">
+                    <textarea id="buyer-address" rows="3" class="w-full p-2 border-2 border-[#2c251f] bg-white outline-none font-sans font-bold text-sm" placeholder="Alamat Lengkap Pengiriman"></textarea>
+                </div>
+                
+                <div class="flex justify-between items-start mb-2 text-xl font-bold pt-2 border-t border-dashed border-gray-400">
                     <span id="ui-total-label" class="mt-1">Total:</span>
                     <div id="cart-total" class="text-right leading-tight">Rp 0</div>
                 </div>
-                <button onclick="checkoutWA()" class="retro-btn w-full py-3 flex items-center justify-center gap-2 text-lg">
-                    <i class="fa-brands fa-whatsapp text-xl"></i> <span id="ui-checkout-btn">Checkout via WhatsApp</span>
+                <button onclick="processCheckout()" class="retro-btn w-full py-3 flex items-center justify-center gap-2 text-lg">
+                    <i class="fa-solid fa-circle-check text-xl"></i> <span id="ui-checkout-btn">Proses Pesanan</span>
                 </button>
-                <p id="ui-wa-note" class="text-xs text-center mt-2 font-bold text-gray-600 leading-tight">
-                    *Pembayaran via Transfer Bank. Nomor rekening ada di WA.
-                </p>
             </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox & Download Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 modal-overlay z-[150] hidden flex justify-center items-center p-4">
+        <div class="retro-card max-w-3xl w-full bg-white relative p-5 flex flex-col items-center shadow-[10px_10px_0px_#2c251f]">
+            <button onclick="closeLightbox()" class="absolute top-2 right-4 text-4xl font-bold hover:text-red-600 cursor-pointer">&times;</button>
+            <h3 id="lightbox-title" class="font-retro-title font-bold text-2xl mb-4 text-center w-[90%] truncate">Preview Gambar</h3>
+            
+            <div class="border-4 border-[#2c251f] bg-gray-100 p-2 mb-4 w-full flex justify-center">
+                <img id="lightbox-img" src="" alt="Preview Full" class="max-h-[55vh] object-contain">
+            </div>
+            
+            <a id="lightbox-download" href="" download="Retro_Artwork.jpg" target="_blank" class="retro-btn px-6 py-3 w-full max-w-sm text-center flex justify-center items-center gap-2 text-lg hover:bg-[#e6af2e]">
+                <i class="fa-solid fa-download"></i> <span id="ui-download-btn">Download Gambar</span>
+            </a>
         </div>
     </div>
 
@@ -251,19 +270,19 @@
     <div id="toast-container"></div>
 
     <script>
-        // Kamus Bahasa (i18n) untuk 11 Bahasa
+        // Kamus Bahasa (i18n) untuk 11 Bahasa - Diperbarui tanpa WA, tambah Email/Alamat
         const i18n = {
-            ID: { catAll: "Semua", heroTitle: "Karya Vintage & Retro", heroDesc: "Koleksi produk kreatif pilihan. Dari desain lawas hingga media audio visual bergaya klasik. Belanja mudah, estetik tiada dua.", emptyCart: "Keranjang masih kosong, Bung!", total: "Total:", checkout: "Checkout via WhatsApp", waNote: "*Pembayaran via Transfer Bank. Nomor rekening ada di WA.", payInfo: "Info Pembayaran", contact: "Kontak", footerMsg: "Menyajikan karya kreatif bernuansa nostalgia. Estetika masa lalu untuk inspirasi masa depan.", cartTitle: "Mesin Kasir", addedMsg: "dimasukkan ke keranjang!", waHello: "Halo *OpangDarmawan*, saya tertarik untuk membeli karya dari etalasemu:" },
-            EN: { catAll: "All", heroTitle: "Vintage & Retro Artworks", heroDesc: "Curated creative products. From vintage designs to classic audio-visual media. Easy shopping, unparalleled aesthetics.", emptyCart: "Your cart is empty, buddy!", total: "Total:", checkout: "Checkout via WhatsApp", waNote: "*Payment via Bank Transfer. Account number provided in WA.", payInfo: "Payment Info", contact: "Contact", footerMsg: "Presenting creative works with a nostalgic touch. Past aesthetics for future inspiration.", cartTitle: "Cash Register", addedMsg: "added to cart!", waHello: "Hello *OpangDarmawan*, I am interested in buying from your store:" },
-            ES: { catAll: "Todos", heroTitle: "Obras Vintage y Retro", heroDesc: "Productos creativos seleccionados. Compras fáciles, estética incomparable.", emptyCart: "¡Tu carrito está vacío, amigo!", total: "Total:", checkout: "Pagar vía WhatsApp", waNote: "*Pago por transferencia bancaria. Número en WA.", payInfo: "Información de pago", contact: "Contacto", footerMsg: "Presentando trabajos creativos con un toque nostálgico.", cartTitle: "Caja Registradora", addedMsg: "¡añadido al carrito!", waHello: "Hola *OpangDarmawan*, me interesa comprar:" },
-            FR: { catAll: "Tout", heroTitle: "Œuvres Vintage & Rétro", heroDesc: "Produits créatifs sélectionnés. Achats faciles, esthétique inégalée.", emptyCart: "Votre panier est vide !", total: "Total :", checkout: "Payer via WhatsApp", waNote: "*Paiement par virement bancaire. Numéro sur WA.", payInfo: "Infos de paiement", contact: "Contact", footerMsg: "Présentation d'œuvres créatives avec une touche nostalgique.", cartTitle: "Caisse Enregistreuse", addedMsg: "ajouté au panier !", waHello: "Bonjour *OpangDarmawan*, je suis intéressé par :" },
-            DE: { catAll: "Alle", heroTitle: "Vintage & Retro Kunstwerke", heroDesc: "Ausgewählte kreative Produkte. Einfaches Einkaufen, unvergleichliche Ästhetik.", emptyCart: "Dein Warenkorb ist leer!", total: "Gesamt:", checkout: "Kasse via WhatsApp", waNote: "*Zahlung per Banküberweisung. Nummer in WA.", payInfo: "Zahlungsinfos", contact: "Kontakt", footerMsg: "Präsentation kreativer Werke mit nostalgischem Touch.", cartTitle: "Kasse", addedMsg: "zum Warenkorb hinzugefügt!", waHello: "Hallo *OpangDarmawan*, ich möchte kaufen:" },
-            IT: { catAll: "Tutti", heroTitle: "Opere Vintage e Retro", heroDesc: "Prodotti creativi curati. Shopping facile, estetica ineguagliabile.", emptyCart: "Il tuo carrello è vuoto!", total: "Totale:", checkout: "Checkout via WhatsApp", waNote: "*Pagamento tramite bonifico. Numero su WA.", payInfo: "Info Pagamento", contact: "Contatto", footerMsg: "Presentazione di lavori creativi con un tocco nostalgico.", cartTitle: "Registratore di Cassa", addedMsg: "aggiunto al carrello!", waHello: "Ciao *OpangDarmawan*, sono interessato a:" },
-            PT: { catAll: "Todos", heroTitle: "Obras Vintage e Retrô", heroDesc: "Produtos criativos selecionados. Compras fáceis, estética incomparável.", emptyCart: "Seu carrinho está vazio!", total: "Total:", checkout: "Checkout via WhatsApp", waNote: "*Pagamento via transferência bancária. Número no WA.", payInfo: "Info de Pagamento", contact: "Contato", footerMsg: "Apresentando trabalhos criativos com um toque nostálgico.", cartTitle: "Caixa Registradora", addedMsg: "adicionado ao carrinho!", waHello: "Olá *OpangDarmawan*, tenho interesse em comprar:" },
-            RU: { catAll: "Все", heroTitle: "Винтажные и Ретро Работы", heroDesc: "Отборные творческие продукты. Легкие покупки, непревзойденная эстетика.", emptyCart: "Ваша корзина пуста!", total: "Итого:", checkout: "Оформить через WhatsApp", waNote: "*Оплата банковским переводом. Номер в WA.", payInfo: "Оплата", contact: "Контакт", footerMsg: "Представление творческих работ с ностальгическим оттенком.", cartTitle: "Кассовый аппарат", addedMsg: "добавлено в корзину!", waHello: "Здравствуйте *OpangDarmawan*, я хочу купить:" },
-            ZH: { catAll: "全部", heroTitle: "复古与怀旧艺术品", heroDesc: "精选创意产品。轻松购物，无与伦比的美学。", emptyCart: "你的购物车是空的！", total: "总计:", checkout: "通过WhatsApp结账", waNote: "*通过银行转账付款。WA中提供账号。", payInfo: "付款信息", contact: "联系方式", footerMsg: "展示带有怀旧色彩的创意作品。", cartTitle: "收银机", addedMsg: "已添加到购物车！", waHello: "你好 *OpangDarmawan*，我想购买：" },
-            JA: { catAll: "すべて", heroTitle: "ヴィンテージ＆レトロ作品", heroDesc: "厳選されたクリエイティブな製品。簡単な買い物、比類のない美学。", emptyCart: "カートは空です！", total: "合計:", checkout: "WhatsAppでチェックアウト", waNote: "*銀行振込によるお支払い。口座番号はWAで。", payInfo: "支払い情報", contact: "連絡先", footerMsg: "ノスタルジックなタッチのクリエイティブな作品を紹介します。", cartTitle: "レジ", addedMsg: "カートに追加されました！", waHello: "こんにちは *OpangDarmawan*、購入したいです:" },
-            KO: { catAll: "모두", heroTitle: "빈티지 & 레트로 예술품", heroDesc: "엄선된 창의적인 제품들. 쉬운 쇼핑, 비할 데 없는 미학.", emptyCart: "장바구니가 비어있습니다!", total: "총액:", checkout: "WhatsApp으로 결제", waNote: "*은행 송금을 통한 결제. WA에 계좌 번호 제공.", payInfo: "결제 정보", contact: "연락처", footerMsg: "향수 어린 감각의 창의적인 작품을 선보입니다.", cartTitle: "금전등록기", addedMsg: "장바구니에 추가됨!", waHello: "안녕하세요 *OpangDarmawan*, 구매하고 싶습니다:" }
+            ID: { catAll: "Semua", heroTitle: "Karya Vintage & Retro", heroDesc: "Koleksi produk kreatif pilihan. Dari desain lawas hingga media audio visual bergaya klasik. Belanja mudah, estetik tiada dua.", emptyCart: "Keranjang masih kosong, Bung!", total: "Total:", checkout: "Proses Pesanan", payInfo: "Info Pembayaran", contact: "Kontak", footerMsg: "Menyajikan karya kreatif bernuansa nostalgia. Estetika masa lalu untuk inspirasi masa depan.", cartTitle: "Mesin Kasir", addedMsg: "dimasukkan ke keranjang!", emailPlaceholder: "Email Pembeli", addressPlaceholder: "Alamat Lengkap Pengiriman", validationError: "Harap isi Email dan Alamat Lengkap Anda!", checkoutSuccess: "Pesanan berhasil diproses! Cek email Anda.", downloadBtn: "Download Gambar" },
+            EN: { catAll: "All", heroTitle: "Vintage & Retro Artworks", heroDesc: "Curated creative products. From vintage designs to classic audio-visual media. Easy shopping, unparalleled aesthetics.", emptyCart: "Your cart is empty, buddy!", total: "Total:", checkout: "Process Order", payInfo: "Payment Info", contact: "Contact", footerMsg: "Presenting creative works with a nostalgic touch. Past aesthetics for future inspiration.", cartTitle: "Cash Register", addedMsg: "added to cart!", emailPlaceholder: "Buyer Email", addressPlaceholder: "Complete Shipping Address", validationError: "Please fill in your Email and Complete Address!", checkoutSuccess: "Order processed successfully! Check your email.", downloadBtn: "Download Image" },
+            ES: { catAll: "Todos", heroTitle: "Obras Vintage y Retro", heroDesc: "Productos creativos seleccionados. Compras fáciles, estética incomparable.", emptyCart: "¡Tu carrito está vacío, amigo!", total: "Total:", checkout: "Procesar Orden", payInfo: "Información de pago", contact: "Contacto", footerMsg: "Presentando trabajos creativos con un toque nostálgico.", cartTitle: "Caja Registradora", addedMsg: "¡añadido al carrito!", emailPlaceholder: "Correo del Comprador", addressPlaceholder: "Dirección de Envío Completa", validationError: "¡Por favor complete su correo y dirección!", checkoutSuccess: "¡Pedido procesado con éxito! Revise su correo.", downloadBtn: "Descargar Imagen" },
+            FR: { catAll: "Tout", heroTitle: "Œuvres Vintage & Rétro", heroDesc: "Produits créatifs sélectionnés. Achats faciles, esthétique inégalée.", emptyCart: "Votre panier est vide !", total: "Total :", checkout: "Traiter la commande", payInfo: "Infos de paiement", contact: "Contact", footerMsg: "Présentation d'œuvres créatives avec une touche nostalgique.", cartTitle: "Caisse Enregistreuse", addedMsg: "ajouté au panier !", emailPlaceholder: "Email de l'Acheteur", addressPlaceholder: "Adresse de Livraison Complète", validationError: "Veuillez remplir votre email et adresse complète !", checkoutSuccess: "Commande traitée avec succès ! Vérifiez votre email.", downloadBtn: "Télécharger l'image" },
+            DE: { catAll: "Alle", heroTitle: "Vintage & Retro Kunstwerke", heroDesc: "Ausgewählte kreative Produkte. Einfaches Einkaufen, unvergleichliche Ästhetik.", emptyCart: "Dein Warenkorb ist leer!", total: "Gesamt:", checkout: "Bestellung verarbeiten", payInfo: "Zahlungsinfos", contact: "Kontakt", footerMsg: "Präsentation kreativer Werke mit nostalgischem Touch.", cartTitle: "Kasse", addedMsg: "zum Warenkorb hinzugefügt!", emailPlaceholder: "Käufer E-Mail", addressPlaceholder: "Vollständige Lieferadresse", validationError: "Bitte füllen Sie E-Mail und vollständige Adresse aus!", checkoutSuccess: "Bestellung erfolgreich bearbeitet! E-Mail prüfen.", downloadBtn: "Bild herunterladen" },
+            IT: { catAll: "Tutti", heroTitle: "Opere Vintage e Retro", heroDesc: "Prodotti creativi curati. Shopping facile, estetica ineguagliabile.", emptyCart: "Il tuo carrello è vuoto!", total: "Totale:", checkout: "Elabora Ordine", payInfo: "Info Pagamento", contact: "Contatto", footerMsg: "Presentazione di lavori creativi con un tocco nostalgico.", cartTitle: "Registratore di Cassa", addedMsg: "aggiunto al carrello!", emailPlaceholder: "Email Acquirente", addressPlaceholder: "Indirizzo di Spedizione Completo", validationError: "Si prega di compilare Email e Indirizzo Completo!", checkoutSuccess: "Ordine elaborato con successo! Controlla l'email.", downloadBtn: "Scarica Immagine" },
+            PT: { catAll: "Todos", heroTitle: "Obras Vintage e Retrô", heroDesc: "Produtos criativos selecionados. Compras fáceis, estética incomparável.", emptyCart: "Seu carrinho está vazio!", total: "Total:", checkout: "Processar Pedido", payInfo: "Info de Pagamento", contact: "Contato", footerMsg: "Apresentando trabalhos criativos com um toque nostálgico.", cartTitle: "Caixa Registradora", addedMsg: "adicionado ao carrinho!", emailPlaceholder: "Email do Comprador", addressPlaceholder: "Endereço de Entrega Completo", validationError: "Por favor, preencha Email e Endereço Completo!", checkoutSuccess: "Pedido processado com sucesso! Verifique seu email.", downloadBtn: "Baixar Imagem" },
+            RU: { catAll: "Все", heroTitle: "Винтажные и Ретро Работы", heroDesc: "Отборные творческие продукты. Легкие покупки, непревзойденная эстетика.", emptyCart: "Ваша корзина пуста!", total: "Итого:", checkout: "Оформить заказ", payInfo: "Оплата", contact: "Контакт", footerMsg: "Представление творческих работ с ностальгическим оттенком.", cartTitle: "Кассовый аппарат", addedMsg: "добавлено в корзину!", emailPlaceholder: "Email покупателя", addressPlaceholder: "Полный адрес доставки", validationError: "Пожалуйста, заполните Email и полный адрес!", checkoutSuccess: "Заказ успешно обработан! Проверьте email.", downloadBtn: "Скачать изображение" },
+            ZH: { catAll: "全部", heroTitle: "复古与怀旧艺术品", heroDesc: "精选创意产品。轻松购物，无与伦比的美学。", emptyCart: "你的购物车是空的！", total: "总计:", checkout: "处理订单", payInfo: "付款信息", contact: "联系方式", footerMsg: "展示带有怀旧色彩的创意作品。", cartTitle: "收银机", addedMsg: "已添加到购物车！", emailPlaceholder: "买家邮箱", addressPlaceholder: "完整收货地址", validationError: "请填写邮箱和完整地址！", checkoutSuccess: "订单处理成功！请检查您的邮箱。", downloadBtn: "下载图片" },
+            JA: { catAll: "すべて", heroTitle: "ヴィンテージ＆レトロ作品", heroDesc: "厳選されたクリエイティブな製品。簡単な買い物、比類のない美学。", emptyCart: "カートは空です！", total: "合計:", checkout: "注文を処理する", payInfo: "支払い情報", contact: "連絡先", footerMsg: "ノスタルジックなタッチのクリエイティブな作品を紹介します。", cartTitle: "レジ", addedMsg: "カートに追加されました！", emailPlaceholder: "購入者のメールアドレス", addressPlaceholder: "完全な配送先住所", validationError: "メールアドレスと完全な住所を入力してください！", checkoutSuccess: "注文が正常に処理されました！メールを確認してください。", downloadBtn: "画像をダウンロード" },
+            KO: { catAll: "모두", heroTitle: "빈티지 & 레트로 예술품", heroDesc: "엄선된 창의적인 제품들. 쉬운 쇼핑, 비할 데 없는 미학.", emptyCart: "장바구니가 비어있습니다!", total: "총액:", checkout: "주문 처리", payInfo: "결제 정보", contact: "연락처", footerMsg: "향수 어린 감각의 창의적인 작품을 선보입니다.", cartTitle: "금전등록기", addedMsg: "장바구니에 추가됨!", emailPlaceholder: "구매자 이메일", addressPlaceholder: "전체 배송지 주소", validationError: "이메일과 전체 주소를 기입해 주세요!", checkoutSuccess: "주문이 성공적으로 처리되었습니다! 이메일을 확인하세요.", downloadBtn: "이미지 다운로드" }
         };
 
         let currentLang = 'ID'; 
@@ -279,7 +298,7 @@
         };
         const mainCategories = Object.keys(categoryMap);
 
-        // Data Produk (DIPERBARUI: Menggunakan Link Media Safe/Open Source Anti-Blokir)
+        // Data Produk (DIPERBARUI untuk format PDF & Gambar Lightbox)
         const products = [
             {
                 id: 1,
@@ -289,7 +308,7 @@
                 mediaType: "image",
                 priceIDR: 150000,
                 priceUSD: 10.50,
-                image: "OKV06886b.jpg",
+                image: "https://placehold.co/800x800/d3c6aa/2c251f?text=Poster+Typografi+Retro",
                 desc: "Desain poster gaya retro tahun 70an dengan typografi klasik."
             },
             {
@@ -298,7 +317,7 @@
                 category: "Musik",
                 subCategory: "Kaset",
                 mediaType: "audio",
-                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", // MDN Safe Audio Link
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", 
                 priceIDR: 120000,
                 priceUSD: 8.50,
                 image: "https://placehold.co/400x400/d95c14/ffffff?text=Kaset+Pita",
@@ -310,7 +329,7 @@
                 category: "Video",
                 subCategory: "Animasi",
                 mediaType: "video",
-                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4", // MDN Safe Video Link
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4", 
                 priceIDR: 350000,
                 priceUSD: 24.00,
                 image: "https://placehold.co/400x400/197278/ffffff?text=Retro+Bumper",
@@ -322,7 +341,7 @@
                 category: "Video",
                 subCategory: "Dokumenter",
                 mediaType: "video",
-                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4", // MDN Safe Video Link
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4",
                 priceIDR: 200000,
                 priceUSD: 14.00,
                 image: "https://placehold.co/400x400/2c251f/f4ecd8?text=VHS+Footage",
@@ -336,7 +355,7 @@
                 mediaType: "image",
                 priceIDR: 75000,
                 priceUSD: 5.00,
-                image: "https://placehold.co/400x400/197278/f4ecd8?text=Analog+Preset",
+                image: "https://placehold.co/800x800/197278/f4ecd8?text=Analog+Preset+Filter",
                 desc: "Paket filter Lightroom untuk memberikan efek roll film jadul pada foto digitalmu."
             },
             {
@@ -347,19 +366,20 @@
                 mediaType: "image",
                 priceIDR: 350000,
                 priceUSD: 24.00,
-                image: "https://placehold.co/400x400/8b5a2b/ffffff?text=Dompet+Kulit",
+                image: "https://placehold.co/800x800/8b5a2b/ffffff?text=Dompet+Kulit+Asli",
                 desc: "Dompet kulit sapi asli yang dibuat dan dijahit tangan. Sangat awet."
             },
             {
                 id: 7,
-                name: "Jasa Ketik Puisi Romantis",
+                name: "Kumpulan Puisi Romantis (PDF)",
                 category: "Tulisan",
                 subCategory: "Puisi",
-                mediaType: "image",
+                mediaType: "pdf", // Menggunakan Tipe Media PDF
+                mediaUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", 
                 priceIDR: 50000,
                 priceUSD: 3.50,
-                image: "https://placehold.co/400x400/d3c6aa/2c251f?text=Puisi+Ketik",
-                desc: "Puisi custom diketik menggunakan mesin tik antik pada kertas buram wangi."
+                image: "https://placehold.co/400x400/d3c6aa/2c251f?text=Buku+Puisi",
+                desc: "Buku digital kumpulan puisi cinta. Tersedia format PDF interaktif langsung bisa dibaca."
             },
             {
                 id: 8,
@@ -367,7 +387,7 @@
                 category: "Musik",
                 subCategory: "Digital Audio",
                 mediaType: "audio",
-                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", // MDN Safe Audio Link
+                mediaUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", 
                 priceIDR: 45000,
                 priceUSD: 3.00,
                 image: "https://placehold.co/400x400/ff3366/ffffff?text=Lofi+Beats",
@@ -378,7 +398,6 @@
         let cart = [];
         let activeCategory = "Semua";
         let activeSubCategory = "Semua";
-        const waNumber = "6281234567890"; 
 
         // Format Mata Uang 
         function formatPrice(amount, currency) {
@@ -403,7 +422,11 @@
             document.getElementById('ui-cart-title').innerText = t.cartTitle;
             document.getElementById('ui-total-label').innerText = t.total;
             document.getElementById('ui-checkout-btn').innerText = t.checkout;
-            document.getElementById('ui-wa-note').innerText = t.waNote;
+            
+            // Form & Lightbox Text Updates
+            document.getElementById('buyer-email').placeholder = t.emailPlaceholder;
+            document.getElementById('buyer-address').placeholder = t.addressPlaceholder;
+            document.getElementById('ui-download-btn').innerText = t.downloadBtn;
             
             // Re-render components
             renderCategories();
@@ -497,6 +520,7 @@
 
             filteredProducts.forEach(product => {
                 let mediaHTML = "";
+                
                 if (product.mediaType === "video") {
                     mediaHTML = `
                         <video controls class="w-full h-48 object-cover bg-black" poster="${product.image}">
@@ -512,8 +536,24 @@
                             </div>
                         </div>
                     `;
+                } else if (product.mediaType === "pdf") {
+                    // Embed iframe penampil PDF/Document
+                    mediaHTML = `
+                        <iframe src="${product.mediaUrl}#toolbar=0&navpanes=0&scrollbar=0" 
+                                class="w-full h-48 border-none overflow-hidden bg-white" 
+                                title="PDF Viewer">
+                        </iframe>
+                    `;
                 } else {
-                    mediaHTML = `<img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300">`;
+                    // Tipe Gambar - Punya interaksi klik untuk Lightbox
+                    mediaHTML = `
+                        <div class="relative group cursor-pointer w-full h-48" onclick="openLightbox('${product.image}', '${product.name}')">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/40 hidden group-hover:flex justify-center items-center backdrop-blur-sm transition-all">
+                                <i class="fa-solid fa-magnifying-glass-plus text-white text-4xl drop-shadow-md"></i>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 const card = document.createElement('div');
@@ -540,6 +580,24 @@
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        // Functions Lightbox Gambar & Download
+        function openLightbox(imageUrl, title) {
+            const modal = document.getElementById('lightbox-modal');
+            document.getElementById('lightbox-img').src = imageUrl;
+            document.getElementById('lightbox-title').innerText = title;
+            
+            // Set URL Download. Target blank digunakan jika URL bersifat cross-origin (ex: placehold.co)
+            const downloadBtn = document.getElementById('lightbox-download');
+            downloadBtn.href = imageUrl;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').classList.add('hidden');
+            document.getElementById('lightbox-img').src = "";
         }
 
         // Keranjang Functions
@@ -576,8 +634,8 @@
                 if (item.qty <= 0) {
                     removeFromCart(productId);
                 } else {
-                    updateCartCount(); // Pastikan update badge merah sinkron
-                    renderCart();      // Perbarui tampilan baris harga total
+                    updateCartCount(); 
+                    renderCart();      
                 }
             }
         }
@@ -596,25 +654,21 @@
             let totalUSD = 0;
 
             if (cart.length === 0) {
-                // Pesan keranjang kosong sekarang dibuat secara dinamis untuk mencegah error null
-                container.innerHTML = `<div class="text-center text-gray-500 py-6" id="empty-cart-msg">${i18n[currentLang].emptyCart}</div>`;
+                container.innerHTML = `<div class="text-center text-gray-500 py-6 font-bold" id="empty-cart-msg">${i18n[currentLang].emptyCart}</div>`;
                 totalEl.innerHTML = `${formatPrice(0, 'IDR')} <br><span class="text-sm font-bold text-gray-500">${formatPrice(0, 'USD')}</span>`;
                 return;
             }
 
             cart.forEach(item => {
-                // Kalkulasi Sub-total untuk masing-masing baris item yang berubah seiring qty
                 const subTotalIDR = item.priceIDR * item.qty;
                 const subTotalUSD = item.priceUSD * item.qty;
                 
-                // Kalkulasi Grand Total Keseluruhan
                 totalIDR += subTotalIDR;
                 totalUSD += subTotalUSD;
 
                 const row = document.createElement('div');
                 row.className = 'flex items-center gap-3 border-b-2 border-dashed border-gray-300 pb-3';
                 
-                // UI Tombol Qty & Harga Sub-Total Baris Produk
                 row.innerHTML = `
                     <img src="${item.image}" class="w-16 h-16 object-cover border border-[#2c251f]">
                     <div class="flex-grow">
@@ -631,36 +685,37 @@
                 container.appendChild(row);
             });
 
-            // Tampilkan total keseluruhan di bawah (dua mata uang)
             totalEl.innerHTML = `${formatPrice(totalIDR, 'IDR')} <br><span class="text-sm font-bold text-gray-500">${formatPrice(totalUSD, 'USD')}</span>`;
         }
 
-        // WhatsApp Checkout terjemahan
-        function checkoutWA() {
+        // Checkout Proses menggunakan form lokal tanpa WhatsApp
+        function processCheckout() {
             if (cart.length === 0) {
                 showToast(i18n[currentLang].emptyCart, true);
                 return;
             }
 
-            let text = `${i18n[currentLang].waHello}\n\n`;
-            let totalIDR = 0;
-            let totalUSD = 0;
+            const email = document.getElementById('buyer-email').value.trim();
+            const address = document.getElementById('buyer-address').value.trim();
 
-            cart.forEach((item, index) => {
-                const subIDR = item.priceIDR * item.qty;
-                const subUSD = item.priceUSD * item.qty;
-                totalIDR += subIDR;
-                totalUSD += subUSD;
-                text += `${index + 1}. ${item.name}\n   ${item.qty}x ${formatPrice(item.priceIDR, 'IDR')} = ${formatPrice(subIDR, 'IDR')} (${formatPrice(subUSD, 'USD')})\n`;
-            });
+            // Validasi Input Email dan Alamat
+            if (!email || !address) {
+                showToast(i18n[currentLang].validationError, true);
+                return;
+            }
 
-            text += `\n*${i18n[currentLang].total} ${formatPrice(totalIDR, 'IDR')} (${formatPrice(totalUSD, 'USD')})*\n\n`;
-            text += i18n[currentLang].waNote;
-
-            const encodedText = encodeURIComponent(text);
-            const waUrl = `https://wa.me/${waNumber}?text=${encodedText}`;
+            // Simulasi Checkout Sukses
+            showToast(i18n[currentLang].checkoutSuccess);
             
-            window.open(waUrl, '_blank');
+            // Mengosongkan Data
+            cart = [];
+            updateCartCount();
+            renderCart();
+            toggleCart(); // Tutup modal keranjang
+            
+            // Bersihkan input field
+            document.getElementById('buyer-email').value = '';
+            document.getElementById('buyer-address').value = '';
         }
 
         // Custom Toast Notification (Anti-alert blocker)
